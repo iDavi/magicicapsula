@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "magicicapsula"
+version = "0.1.0"
+description = "seal files now, open them later"
+requires-python = ">=3.10"
+dependencies = ["cryptography>=42"]
+
+[project.scripts]
+magicicapsula = "magicicapsula.cli:main"
+
+[tool.setuptools.package-data]
+magicicapsula = ["assets/*.txt"]

@@ -1,0 +1,19 @@
+# python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# venv
+.venv/
+venv/
+env/
+
+# capsule artifacts
+*.mcap
+.capsule/
+
+# os
+.DS_Store
