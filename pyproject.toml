@@ -1,16 +1,46 @@
 [build-system]
-requires = ["setuptools>=61"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "magicicapsula"
-version = "0.1.0"
 description = "seal files now, open them later"
+readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "iDavi", email = "odavi20527@gmail.com" }]
+keywords = ["time-capsule", "encryption", "cli", "archive", "vault"]
 dependencies = ["cryptography>=42"]
+dynamic = ["version"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/iDavi/magicicapsula"
+Repository = "https://github.com/iDavi/magicicapsula"
+Issues = "https://github.com/iDavi/magicicapsula/issues"
 
 [project.scripts]
 magicicapsula = "magicicapsula.cli:main"
+
+[tool.setuptools.dynamic]
+version = { attr = "magicicapsula.__version__" }
+
+[tool.setuptools.packages.find]
+include = ["magicicapsula*"]
 
 [tool.setuptools.package-data]
 magicicapsula = ["assets/*.txt"]
