@@ -1,10 +1,5 @@
 # magicicapsula
 
-seal files now, open them later. a time capsule on your disk: you stage some
-files, set an unlock date, and seal them into a single `.mcap` file. the file
-won't open (through the tool) until the date has passed. optionally encrypted
-with a password.
-
 ## install
 
 ```
