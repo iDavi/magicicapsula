@@ -7,7 +7,7 @@
 pip install magicicapsula
 ```
 
-needs python 3.10+. one dependency: `cryptography`.
+needs python 3.10+
 
 ## how it works
 
@@ -29,21 +29,6 @@ later, when the date has passed:
 ```
 magicicapsula open capsule.mcap -d ./out
 ```
-
-`.mcap` is one portable binary file. store it anywhere, copy it around. it
-holds any file type (images, pdfs, binaries) byte for byte, not just text.
-
-## passwords
-
-- with a password (default): contents are encrypted (aes-128 via `cryptography`),
-  unreadable without the password. `open` and `verify` prompt for it.
-- without a password (`seal --no-password`): no encryption. the unlock date is
-  the only gate, so anyone with the file can open it after that date. don't put
-  anything private in a no-password capsule.
-
-note: the unlock date is enforced by the tool, not by cryptography. if you hold
-the password you could decrypt early with other means. the date stops casual
-early opening, not a determined holder.
 
 ## commands
 
@@ -117,7 +102,6 @@ magicicapsula verify <file>
 ```
 
 ### version
-show the version and logo.
 
 ```
 magicicapsula version
@@ -125,18 +109,6 @@ magicicapsula version
 
 ## date format
 
-`YYYY-MM-DD` or `YYYY-MM-DDTHH:MM`, read as local time. examples:
+`YYYY-MM-DD` or `YYYY-MM-DDTHH:MM`,
 `2030-01-01`, `2030-01-01T08:00`.
 
-## colors
-
-output is colored in a terminal and plain when piped or redirected. set
-`NO_COLOR=1` to turn colors off.
-
-## dates and gotchas
-
-- staged entries are paths, read at seal time, not copied when you add them.
-  if a staged file is moved or deleted before sealing, `status` marks it
-  `(missing)` and `seal` refuses until it's fixed.
-- files are stored under their base name, so two staged files with the same
-  name would collide.
