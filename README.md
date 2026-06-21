@@ -1,3 +1,6 @@
+# MAGICICADA !!!!!!
+<img width="932" height="718" alt="image" src="https://github.com/user-attachments/assets/bf9ab92c-4933-42d6-8941-3accdf392a51" />
+
 # magicicapsula
 <img width="512" height="512" alt="image" src="https://github.com/user-attachments/assets/db00444f-3795-45f1-8176-3f26aaa64498" />
 
