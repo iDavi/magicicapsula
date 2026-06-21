@@ -1,9 +1,10 @@
 # magicicapsula
+<img width="512" height="512" alt="image" src="https://github.com/user-attachments/assets/db00444f-3795-45f1-8176-3f26aaa64498" />
 
 ## install
 
 ```
-pip install -e .
+pip install magicicapsula
 ```
 
 needs python 3.10+. one dependency: `cryptography`.
