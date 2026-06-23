@@ -2,11 +2,11 @@
 
 import calendar
 import getpass
-import os
 import re
 from datetime import datetime, timedelta
 
-PASSWORD_ENV = "MAGICICAPSULA_PASSWORD"
+from magicicapsula.core import config
+
 _RELATIVE = re.compile(r"^\+(\d+)([dwmy])$", re.IGNORECASE)
 
 
@@ -16,9 +16,9 @@ def read_capsule(path):
 
 
 def ask_password(confirm=False):
-    env = os.environ.get(PASSWORD_ENV)
-    if env:
-        return env
+    configured = config.get("password")
+    if configured:
+        return configured
     pw = getpass.getpass("password: ")
     if not pw:
         raise SystemExit("error: empty password")

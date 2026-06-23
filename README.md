@@ -127,6 +127,16 @@ magicicapsula remind <file> [-o FILE] [-b DAYS] [-f]
 magicicapsula version
 ```
 
+### config
+show configuration and where each value is read from. settings resolve in the
+order default < config file < environment variable. the config file is
+`~/.config/magicicapsula/config.json` (a flat json object), e.g.
+`{"password": "..."}`; `MAGICICAPSULA_PASSWORD` overrides it.
+
+```
+magicicapsula config
+```
+
 ## date format
 
 absolute `YYYY-MM-DD` or `YYYY-MM-DDTHH:MM` (`2030-01-01`, `2030-01-01T08:00`),
