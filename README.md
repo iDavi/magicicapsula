@@ -51,6 +51,11 @@ stage files or folders to put in the capsule.
 
 ```
 magicicapsula add <paths...>
+magicicapsula add --text "dear future me" [--name letter.txt]
+echo "..." | magicicapsula add -
+
+  --text TEXT  stage text directly, no file needed
+  --name NAME  filename for --text or stdin (default: note.txt)
 ```
 
 ### status
@@ -124,6 +129,6 @@ magicicapsula version
 
 ## date format
 
-`YYYY-MM-DD` or `YYYY-MM-DDTHH:MM`,
-`2030-01-01`, `2030-01-01T08:00`.
+absolute `YYYY-MM-DD` or `YYYY-MM-DDTHH:MM` (`2030-01-01`, `2030-01-01T08:00`),
+or relative from now: `+30d`, `+2w`, `+6m`, `+1y`.
 

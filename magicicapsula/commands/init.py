@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from magicicapsula.core import draft
+from magicicapsula.commands._util import parse_unlock
 
 
 def register(sub):
@@ -18,11 +17,7 @@ def run(args):
         raise SystemExit("error: a capsule draft already exists here (.capsule/)")
 
     if args.unlock:
-        try:
-            datetime.fromisoformat(args.unlock)
-        except ValueError:
-            raise SystemExit(f"error: bad date {args.unlock!r} (use YYYY-MM-DD or YYYY-MM-DDTHH:MM)")
-        d.unlock_at = args.unlock
+        d.unlock_at = parse_unlock(args.unlock).isoformat()  # resolve +30d/+1y etc. now
     d.note = args.note
     d.out = args.out
     draft.save(d)

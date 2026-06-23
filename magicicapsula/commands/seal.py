@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from magicicapsula.core import capsule, draft
 from magicicapsula.commands import _style
-from magicicapsula.commands._util import ask_password
+from magicicapsula.commands._util import ask_password, parse_unlock
 
 
 def register(sub):
@@ -18,20 +18,13 @@ def register(sub):
     p.set_defaults(func=run)
 
 
-def _parse_date(s):
-    try:
-        dt = datetime.fromisoformat(s)
-    except ValueError:
-        raise SystemExit(f"error: bad date {s!r} (use YYYY-MM-DD or YYYY-MM-DDTHH:MM)")
-    return dt.astimezone() if dt.tzinfo is None else dt  # naive means local time
-
-
 def run(args):
     d = draft.load()
 
-    # flags override the draft and stick, so status keeps showing the right thing
+    # flags override the draft and stick, so status keeps showing the right thing.
+    # relative dates are resolved to absolute here, anchored to now.
     if args.unlock is not None:
-        d.unlock_at = args.unlock
+        d.unlock_at = parse_unlock(args.unlock).isoformat()
     if args.note is not None:
         d.note = args.note
     if args.out is not None:
@@ -46,7 +39,7 @@ def run(args):
     if gone:
         raise SystemExit("error: staged files no longer exist:\n  " + "\n  ".join(gone))
 
-    unlock_at = _parse_date(d.unlock_at)
+    unlock_at = parse_unlock(d.unlock_at)
     if unlock_at <= datetime.now(timezone.utc):
         print("warning: unlock date is not in the future", file=sys.stderr)
 

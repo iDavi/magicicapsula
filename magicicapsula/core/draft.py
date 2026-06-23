@@ -18,6 +18,7 @@ from .errors import NoDraft
 
 DRAFT_DIR = ".capsule"
 CONFIG = "config.json"
+FILES_SUBDIR = "files"   # generated content (text/stdin) lives here until seal
 VERSION = 1
 
 
@@ -94,6 +95,30 @@ def add(draft: Draft, paths) -> list[str]:
             added.append(ap)
     save(draft)
     return added
+
+
+def _unique(path: str) -> str:
+    if not os.path.exists(path):
+        return path
+    base, ext = os.path.splitext(path)
+    i = 2
+    while os.path.exists(f"{base}-{i}{ext}"):
+        i += 1
+    return f"{base}-{i}{ext}"
+
+
+def stage_text(draft: Draft, content, name: str = "note.txt") -> str:
+    """Write text (str or bytes) to a file inside the draft and stage it."""
+    name = os.path.basename(name) or "note.txt"
+    dest_dir = os.path.join(draft.dir, FILES_SUBDIR)
+    os.makedirs(dest_dir, exist_ok=True)
+    path = _unique(os.path.join(dest_dir, name))
+    data = content if isinstance(content, bytes) else content.encode("utf-8")
+    with open(path, "wb") as fh:
+        fh.write(data)
+    draft.staged.append(path)
+    save(draft)
+    return path
 
 
 def remove(draft: Draft, paths) -> list[str]:
