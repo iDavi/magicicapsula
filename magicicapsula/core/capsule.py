@@ -6,10 +6,17 @@ one portable binary file you can store anywhere:
     version           1 byte    container version (the source of truth)
     header length     4 bytes   uint32, big-endian
     header            N bytes   json, utf-8 (dates, kdf params, salt, note)
-    ciphertext        rest      fernet token of a .tar.gz of the contents
+    ciphertext        rest      encrypted .tar.gz of the contents
 
 the header is plaintext so inspect() can show dates without a password.
 the contents, file names included, live only inside the ciphertext.
+
+for password capsules (v2) the cipher is aes-256-gcm and the whole plaintext
+preamble -- magic, version, length, and header -- is fed in as additional
+authenticated data, so altering the unlock date, note, or framing is caught
+on open. v1 used fernet, which has no aad; that path still reads. capsules
+sealed without a password carry no authentication of the header (there is no
+key), matching the "anyone can open after the date" promise.
 
 forward/backward compatibility
 ------------------------------
@@ -36,7 +43,7 @@ from . import crypto
 from .errors import CapsuleLocked, InvalidCapsule, WrongPasswordOrCorrupt
 
 MAGIC = b"MCAP"
-VERSION = 1             # the container version seal() writes
+VERSION = 2             # the container version seal() writes (v2: aes-256-gcm + aad)
 MIN_READ_VERSION = 1    # oldest version this build can still read
 _HEADER_START = 9       # magic(4) + version(1) + header length(4)
 
@@ -110,13 +117,17 @@ def seal(paths, password, unlock_at: datetime, note: str = "") -> bytes:
     if password:
         salt = os.urandom(16)
         params = crypto.KdfParams()
-        payload = crypto.encrypt(payload, password, salt, params)
-        header["cipher"] = "fernet"
+        header["cipher"] = "aes-256-gcm"
         header["kdf"] = {**params.to_dict(), "salt": base64.b64encode(salt).decode()}
     else:
         header["cipher"] = "none"
     hb = json.dumps(header).encode("utf-8")
-    return MAGIC + bytes([VERSION]) + struct.pack(">I", len(hb)) + hb + payload
+    # the preamble is built before the ciphertext so it can be authenticated
+    # as aad: the header it carries is then tamper-evident on open.
+    preamble = MAGIC + bytes([VERSION]) + struct.pack(">I", len(hb)) + hb
+    if password:
+        payload = crypto.encrypt_gcm(payload, password, salt, preamble, params)
+    return preamble + payload
 
 
 def _split(blob: bytes):
@@ -141,7 +152,8 @@ def _split(blob: bytes):
         header = json.loads(blob[_HEADER_START:end])
     except (json.JSONDecodeError, UnicodeDecodeError) as exc:
         raise InvalidCapsule("corrupt header") from exc
-    return version, header, blob[end:]
+    # blob[:end] is the authenticated preamble (aad) for v2 capsules.
+    return version, header, blob[end:], blob[:end]
 
 
 def _read_info(version: int, header: dict) -> CapsuleInfo:
@@ -159,7 +171,7 @@ def _read_info(version: int, header: dict) -> CapsuleInfo:
 
 
 def inspect(blob: bytes) -> CapsuleInfo:
-    version, header, _ = _split(blob)
+    version, header, _, _ = _split(blob)
     try:
         return _read_info(version, header)
     except KeyError as exc:
@@ -167,17 +179,20 @@ def inspect(blob: bytes) -> CapsuleInfo:
 
 
 def _payload(blob: bytes, password) -> bytes:
-    _version, header, token = _split(blob)
+    _version, header, token, aad = _split(blob)
     cipher = header.get("cipher", "fernet")
     if cipher == "none":
         return token
-    if cipher != "fernet":
+    if cipher not in ("fernet", "aes-256-gcm"):
         raise InvalidCapsule(f"unknown cipher: {cipher}")
     if not password:
         raise WrongPasswordOrCorrupt("this capsule needs a password")
     kdf = header["kdf"]
     salt = base64.b64decode(kdf["salt"])
-    return crypto.decrypt(token, password, salt, crypto.KdfParams.from_dict(kdf))
+    params = crypto.KdfParams.from_dict(kdf)
+    if cipher == "fernet":  # v1
+        return crypto.decrypt(token, password, salt, params)
+    return crypto.decrypt_gcm(token, password, salt, aad, params)
 
 
 def verify(blob: bytes, password) -> bool:
