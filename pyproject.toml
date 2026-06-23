@@ -14,7 +14,7 @@ keywords = ["time-capsule", "encryption", "cli", "archive", "vault"]
 dependencies = ["cryptography>=42"]
 dynamic = ["version"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: End Users/Desktop",
     "Operating System :: OS Independent",

@@ -51,6 +51,11 @@ stage files or folders to put in the capsule.
 
 ```
 magicicapsula add <paths...>
+magicicapsula add --text "dear future me" [--name letter.txt]
+echo "..." | magicicapsula add -
+
+  --text TEXT  stage text directly, no file needed
+  --name NAME  filename for --text or stdin (default: note.txt)
 ```
 
 ### status
@@ -122,8 +127,21 @@ magicicapsula remind <file> [-o FILE] [-b DAYS] [-f]
 magicicapsula version
 ```
 
+### config
+show or edit configuration. settings resolve in the order
+default < config file < environment variable. the config file is
+`~/.config/magicicapsula/config.json`; `MAGICICAPSULA_PASSWORD` overrides it.
+
+```
+magicicapsula config                  # list all (secrets masked)
+magicicapsula config --reveal         # list all, secrets shown
+magicicapsula config get <key>        # show one value and its source
+magicicapsula config set <key> <val>  # write to the config file
+magicicapsula config unset <key>      # remove from the config file
+```
+
 ## date format
 
-`YYYY-MM-DD` or `YYYY-MM-DDTHH:MM`,
-`2030-01-01`, `2030-01-01T08:00`.
+absolute `YYYY-MM-DD` or `YYYY-MM-DDTHH:MM` (`2030-01-01`, `2030-01-01T08:00`),
+or relative from now: `+30d`, `+2w`, `+6m`, `+1y`.
 
