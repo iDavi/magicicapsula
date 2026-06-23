@@ -128,13 +128,16 @@ magicicapsula version
 ```
 
 ### config
-show configuration and where each value is read from. settings resolve in the
-order default < config file < environment variable. the config file is
-`~/.config/magicicapsula/config.json` (a flat json object), e.g.
-`{"password": "..."}`; `MAGICICAPSULA_PASSWORD` overrides it.
+show or edit configuration. settings resolve in the order
+default < config file < environment variable. the config file is
+`~/.config/magicicapsula/config.json`; `MAGICICAPSULA_PASSWORD` overrides it.
 
 ```
-magicicapsula config
+magicicapsula config                  # list all (secrets masked)
+magicicapsula config --reveal         # list all, secrets shown
+magicicapsula config get <key>        # show one value and its source
+magicicapsula config set <key> <val>  # write to the config file
+magicicapsula config unset <key>      # remove from the config file
 ```
 
 ## date format

@@ -45,8 +45,41 @@ def _load_file() -> dict:
     return data if isinstance(data, dict) else {}
 
 
+def _write_file(data: dict) -> None:
+    path = config_path()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump(data, fh, indent=2)
+        fh.write("\n")
+
+
 def keys() -> list[str]:
     return list(_SETTINGS)
+
+
+def is_known(key: str) -> bool:
+    return key in _SETTINGS
+
+
+def set_value(key: str, value: str) -> None:
+    """Write a setting to the config file. Raises KeyError for unknown keys."""
+    if key not in _SETTINGS:
+        raise KeyError(key)
+    data = _load_file()
+    data[key] = value
+    _write_file(data)
+
+
+def unset(key: str) -> bool:
+    """Remove a setting from the config file. Returns whether it was present."""
+    if key not in _SETTINGS:
+        raise KeyError(key)
+    data = _load_file()
+    existed = key in data
+    if existed:
+        data.pop(key)
+        _write_file(data)
+    return existed
 
 
 def resolve(key: str):
@@ -64,10 +97,10 @@ def get(key: str):
     return resolve(key)[0]
 
 
-def display(key: str, value) -> str:
-    """Human-readable value for `config`, masking secrets."""
+def display(key: str, value, reveal: bool = False) -> str:
+    """Human-readable value for `config`, masking secrets unless reveal is set."""
     if value is None:
         return "(not set)"
-    if _SETTINGS[key].secret:
+    if _SETTINGS[key].secret and not reveal:
         return "***"
     return str(value)
