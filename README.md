@@ -104,6 +104,18 @@ check a capsule's integrity (and the password, if any) without opening it.
 magicicapsula verify <file>
 ```
 
+### remind
+write a calendar (`.ics`) reminder for a capsule's unlock date. no account
+or api needed: import the file into any calendar (google, apple, outlook).
+
+```
+magicicapsula remind <file> [-o FILE] [-b DAYS] [-f]
+
+  -o, --out FILE    output .ics path (default: <capsule>.ics)
+  -b, --before DAYS remind this many days before the unlock date
+  -f, --force       overwrite the output if it exists
+```
+
 ### version
 
 ```
