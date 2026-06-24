@@ -7,8 +7,9 @@ def register(sub):
     p = sub.add_parser("add", help="stage files or folders to put in the capsule")
     p.add_argument("paths", nargs="*", help="files or folders to stage (use - to read stdin)")
     p.add_argument("--text", metavar="TEXT", help="stage this text directly, no file needed")
-    p.add_argument("--name", metavar="NAME", default="note.txt",
-                   help="filename for --text or stdin (default: note.txt)")
+    p.add_argument(
+        "--name", metavar="NAME", default="note.txt", help="filename for --text or stdin (default: note.txt)"
+    )
     p.set_defaults(func=run)
 
 

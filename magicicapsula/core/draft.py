@@ -18,14 +18,14 @@ from .errors import NoDraft
 
 DRAFT_DIR = ".capsule"
 CONFIG = "config.json"
-FILES_SUBDIR = "files"   # generated content (text/stdin) lives here until seal
+FILES_SUBDIR = "files"  # generated content (text/stdin) lives here until seal
 VERSION = 1
 
 
 @dataclass
 class Draft:
-    root: str                       # directory containing .capsule/
-    unlock_at: str | None = None    # ISO date/datetime as typed by the user
+    root: str  # directory containing .capsule/
+    unlock_at: str | None = None  # ISO date/datetime as typed by the user
     note: str = ""
     out: str = "capsule.mcap"
     staged: list[str] = field(default_factory=list)  # absolute paths

@@ -50,10 +50,7 @@ def parse_unlock(s: str) -> datetime:
     try:
         dt = datetime.fromisoformat(s)
     except ValueError:
-        raise SystemExit(
-            f"error: bad date {s!r} "
-            "(use YYYY-MM-DD, YYYY-MM-DDTHH:MM, or +30d/+2w/+6m/+1y)"
-        )
+        raise SystemExit(f"error: bad date {s!r} (use YYYY-MM-DD, YYYY-MM-DDTHH:MM, or +30d/+2w/+6m/+1y)") from None
     return dt.astimezone() if dt.tzinfo is None else dt  # naive means local time
 
 

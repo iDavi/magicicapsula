@@ -1,6 +1,6 @@
-from magicicapsula.core import capsule
 from magicicapsula.commands import _style
 from magicicapsula.commands._util import ask_password, read_capsule
+from magicicapsula.core import capsule
 
 
 def register(sub):

@@ -1,8 +1,9 @@
+import contextlib
 import os
 from datetime import datetime
 
-from magicicapsula.core import draft
 from magicicapsula.commands import _style
+from magicicapsula.core import draft
 
 
 def _fmt_size(n: int) -> str:
@@ -47,10 +48,8 @@ def run(args):
     present = [p for p in d.staged if p not in gone]
     total_size = 0
     for p in present:
-        try:
+        with contextlib.suppress(OSError):
             total_size += os.path.getsize(p)
-        except OSError:
-            pass
     if present:
         print(f", {_fmt_size(total_size)}")
     else:

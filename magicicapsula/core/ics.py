@@ -17,11 +17,7 @@ def _stamp(dt: datetime) -> str:
 def _escape(text: str) -> str:
     # rfc 5545 3.3.11: escape backslash first, then ; , and newlines.
     return (
-        text.replace("\\", "\\\\")
-        .replace(";", "\\;")
-        .replace(",", "\\,")
-        .replace("\r\n", "\\n")
-        .replace("\n", "\\n")
+        text.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\r\n", "\\n").replace("\n", "\\n")
     )
 
 
@@ -48,7 +44,7 @@ def _fold(line: str) -> str:
 def _uid(name: str, unlock_at: datetime) -> str:
     # stable across re-runs for the same capsule, so re-importing updates
     # the event instead of creating a duplicate.
-    digest = hashlib.sha1(f"{name}|{_stamp(unlock_at)}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha1(f"{name}|{_stamp(unlock_at)}".encode()).hexdigest()
     return f"{digest[:16]}@magicicapsula"
 
 

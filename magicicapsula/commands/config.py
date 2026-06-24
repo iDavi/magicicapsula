@@ -1,14 +1,18 @@
 import os
 
-from magicicapsula.core import config
 from magicicapsula.commands import _style
+from magicicapsula.core import config
 
 
 def register(sub):
     p = sub.add_parser("config", help="show or edit configuration")
-    p.add_argument("action", nargs="?", default="list",
-                   choices=["list", "get", "set", "unset"],
-                   help="list (default), get, set, or unset a setting")
+    p.add_argument(
+        "action",
+        nargs="?",
+        default="list",
+        choices=["list", "get", "set", "unset"],
+        help="list (default), get, set, or unset a setting",
+    )
     p.add_argument("key", nargs="?", help="setting name")
     p.add_argument("value", nargs="?", help="value, for set")
     p.add_argument("--reveal", action="store_true", help="show secret values instead of masking")
@@ -48,6 +52,6 @@ def _list(reveal):
     print(f"config file: {path}")
     print(_style.dim("             " + ("found" if os.path.exists(path) else "not present")))
     print()
-    for key in config.keys():
+    for key in config.keys():  # noqa: SIM118 - config is a module, not a dict
         value, source = config.resolve(key)
         print(f"  {key} = {config.display(key, value, reveal)}  {_style.dim('(' + source + ')')}")

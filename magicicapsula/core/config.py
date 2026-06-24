@@ -20,9 +20,9 @@ APP = "magicicapsula"
 
 @dataclass(frozen=True)
 class _Setting:
-    env: str | None = None      # environment variable that overrides the file
+    env: str | None = None  # environment variable that overrides the file
     default: object = None
-    secret: bool = False        # masked by display() / the `config` command
+    secret: bool = False  # masked by display() / the `config` command
 
 
 # the registry. one line per setting; add new ones here.

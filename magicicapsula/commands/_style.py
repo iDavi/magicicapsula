@@ -13,11 +13,7 @@ _ANSI = re.compile(r"\x1b\[[0-9;]*m")
 
 
 def enabled():
-    return (
-        sys.stdout.isatty()
-        and os.environ.get("NO_COLOR") is None
-        and os.environ.get("TERM") != "dumb"
-    )
+    return sys.stdout.isatty() and os.environ.get("NO_COLOR") is None and os.environ.get("TERM") != "dumb"
 
 
 def paint(text, code):

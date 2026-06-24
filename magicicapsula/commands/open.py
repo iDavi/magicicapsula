@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 
-from magicicapsula.core import capsule
 from magicicapsula.commands import _style
 from magicicapsula.commands._util import ask_password, fmt_remaining, read_capsule
+from magicicapsula.core import capsule
 
 
 def register(sub):

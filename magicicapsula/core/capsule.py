@@ -43,9 +43,9 @@ from . import crypto
 from .errors import CapsuleLocked, InvalidCapsule, WrongPasswordOrCorrupt
 
 MAGIC = b"MCAP"
-VERSION = 2             # the container version seal() writes (v2: aes-256-gcm + aad)
-MIN_READ_VERSION = 1    # oldest version this build can still read
-_HEADER_START = 9       # magic(4) + version(1) + header length(4)
+VERSION = 2  # the container version seal() writes (v2: aes-256-gcm + aad)
+MIN_READ_VERSION = 1  # oldest version this build can still read
+_HEADER_START = 9  # magic(4) + version(1) + header length(4)
 
 
 @dataclass
