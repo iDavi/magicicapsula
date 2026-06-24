@@ -5,6 +5,7 @@ import sys
 
 from magicicapsula import commands
 from magicicapsula.commands import _style
+from magicicapsula.commands.version import VersionPrintAction
 from magicicapsula.core.errors import CapsuleError
 
 
@@ -13,11 +14,13 @@ def build_parser():
         prog="magicicapsula",
         description="seal files now, open them later",
     )
+
     sub = parser.add_subparsers(dest="command", metavar="<command>")
+    parser.add_argument("--version", "-V", nargs=0, action=VersionPrintAction, help="show the version and logo")
     sub.required = True
 
     # every non-underscore module in commands/ with a register() becomes a command.
-    # drop in a new file and it shows up, nothing else to wire.
+    # drop in a new file, and it shows up, nothing else to wire.
     for _, name, _ in pkgutil.iter_modules(commands.__path__):
         if name.startswith("_"):
             continue
