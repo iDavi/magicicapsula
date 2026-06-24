@@ -6,9 +6,10 @@ from magicicapsula.commands import _style
 
 
 def _fmt_size(n: int) -> str:
-    size: float = n
+    size: float = float(n)
     for unit in ("B", "KB", "MB", "GB", "TB"):
-        if size < 1024:
+        # promote to the next unit once the value would render as 1024.x here
+        if round(size, 0 if unit == "B" else 1) < 1024:
             return f"{size:.0f} {unit}" if unit == "B" else f"{size:.1f} {unit}"
         size /= 1024
     return f"{size:.1f} PB"
@@ -43,14 +44,14 @@ def run(args):
     for p in d.staged:
         print(f"  {p}{_style.red('  (missing)') if p in gone else ''}")
     print(f"\n{len(d.staged)} item(s) staged", end="")
+    present = [p for p in d.staged if p not in gone]
     total_size = 0
-    for p in d.staged:
-        if p not in gone:
-            try:
-                total_size += os.path.getsize(p)
-            except OSError:
-                pass
-    if total_size > 0:
+    for p in present:
+        try:
+            total_size += os.path.getsize(p)
+        except OSError:
+            pass
+    if present:
         print(f", {_fmt_size(total_size)}")
     else:
         print()
