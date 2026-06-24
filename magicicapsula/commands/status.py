@@ -5,14 +5,16 @@ from datetime import datetime
 from magicicapsula.commands import _style
 from magicicapsula.core import draft
 
+_UNIT_STEP = 1024  # bytes per unit; promote to KB/MB/... at each step
+
 
 def _fmt_size(n: int) -> str:
     size: float = float(n)
     for unit in ("B", "KB", "MB", "GB", "TB"):
         # promote to the next unit once the value would render as 1024.x here
-        if round(size, 0 if unit == "B" else 1) < 1024:
+        if round(size, 0 if unit == "B" else 1) < _UNIT_STEP:
             return f"{size:.0f} {unit}" if unit == "B" else f"{size:.1f} {unit}"
-        size /= 1024
+        size /= _UNIT_STEP
     return f"{size:.1f} PB"
 
 

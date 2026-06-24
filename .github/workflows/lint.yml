@@ -1,6 +1,7 @@
 name: lint
 
-# keeps the codebase to a single, enforced style on every push and PR
+# enforces style and catches common code smells (incl. AI-generated ones:
+# dead/commented-out code, blind excepts, magic numbers, ...) on push and PR
 on:
   push:
     branches: ["**"]

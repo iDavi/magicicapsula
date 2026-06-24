@@ -53,7 +53,29 @@ line-length = 120
 target-version = "py310"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "I", "UP", "B", "SIM", "C4", "RUF"]
+select = [
+    "E",       # pycodestyle errors
+    "F",       # pyflakes (unused imports/vars, undefined names)
+    "W",       # pycodestyle warnings
+    "I",       # import sorting
+    "UP",      # pyupgrade (outdated syntax)
+    "B",       # bugbear (likely bugs: mutable defaults, etc.)
+    "SIM",     # simplifiable code
+    "C4",      # comprehension cleanups
+    "RUF",     # ruff-specific
+    # --- catches common AI-generated code smells ---
+    "ERA",     # commented-out / dead code left behind
+    "BLE",     # blind `except:` that swallows everything
+    "RET",     # redundant else/return after return
+    "PERF",    # obvious performance anti-patterns
+    "PIE",     # misc unnecessary code (pass, dict updates, ...)
+    "TRY",     # exception handling anti-patterns
+    "PLW",     # pylint warnings (e.g. clobbered loop vars)
+    "PLR2004", # unexplained magic numbers in comparisons
+]
+ignore = [
+    "TRY003",  # long messages at the raise site read fine for a small CLI
+]
 
 [tool.ruff.lint.flake8-bugbear]
 # KdfParams is a frozen (immutable) dataclass, so it's safe as a default.

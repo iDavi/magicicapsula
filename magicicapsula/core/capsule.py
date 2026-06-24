@@ -79,10 +79,10 @@ def _pack(paths) -> bytes:
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
         for path in paths:
-            path = os.path.normpath(path)
-            if not os.path.exists(path):
-                raise FileNotFoundError(path)
-            tar.add(path, arcname=os.path.basename(path))
+            norm = os.path.normpath(path)
+            if not os.path.exists(norm):
+                raise FileNotFoundError(norm)
+            tar.add(norm, arcname=os.path.basename(norm))
     return buf.getvalue()
 
 
