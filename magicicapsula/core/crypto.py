@@ -25,7 +25,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from .errors import WrongPasswordOrCorrupt
 
 # scrypt cost parameters. Memory cost ~= 128 * r * n bytes (~32 MB here).
-SCRYPT_N = 2 ** 15
+SCRYPT_N = 2**15
 SCRYPT_R = 8
 SCRYPT_P = 1
 KEY_LEN = 32
@@ -69,15 +69,14 @@ def _scrypt(password: str, salt: bytes, params: KdfParams) -> bytes:
 
 # --- v2: aes-256-gcm with authenticated header -----------------------------
 
-def encrypt_gcm(data: bytes, password: str, salt: bytes, aad: bytes,
-                params: KdfParams = KdfParams()) -> bytes:
+
+def encrypt_gcm(data: bytes, password: str, salt: bytes, aad: bytes, params: KdfParams = KdfParams()) -> bytes:
     """Encrypt, authenticating `aad` (the header) alongside. Output is nonce + ciphertext."""
     nonce = os.urandom(GCM_NONCE_LEN)
     return nonce + AESGCM(_scrypt(password, salt, params)).encrypt(nonce, data, aad)
 
 
-def decrypt_gcm(token: bytes, password: str, salt: bytes, aad: bytes,
-                params: KdfParams = KdfParams()) -> bytes:
+def decrypt_gcm(token: bytes, password: str, salt: bytes, aad: bytes, params: KdfParams = KdfParams()) -> bytes:
     """Decrypt and verify both the ciphertext and `aad`. Raises if either was altered."""
     nonce, ct = token[:GCM_NONCE_LEN], token[GCM_NONCE_LEN:]
     try:
@@ -87,6 +86,7 @@ def decrypt_gcm(token: bytes, password: str, salt: bytes, aad: bytes,
 
 
 # --- v1: fernet, kept so old capsules still open ---------------------------
+
 
 def derive_key(password: str, salt: bytes, params: KdfParams = KdfParams()) -> bytes:
     return base64.urlsafe_b64encode(_scrypt(password, salt, params))

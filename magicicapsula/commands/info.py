@@ -1,9 +1,9 @@
 import json
 from datetime import datetime, timezone
 
-from magicicapsula.core import capsule
 from magicicapsula.commands import _style
 from magicicapsula.commands._util import fmt_remaining, read_capsule
+from magicicapsula.core import capsule
 
 
 def register(sub):
@@ -20,14 +20,18 @@ def run(args):
     remaining = info.remaining(now)
 
     if args.json:
-        print(json.dumps({
-            "created_at": info.created_at.astimezone().isoformat(),
-            "unlock_at": info.unlock_at.astimezone().isoformat(),
-            "cipher": info.cipher,
-            "note": info.note,
-            "open": is_open,
-            "remaining_seconds": int(remaining.total_seconds()),
-        }))
+        print(
+            json.dumps(
+                {
+                    "created_at": info.created_at.astimezone().isoformat(),
+                    "unlock_at": info.unlock_at.astimezone().isoformat(),
+                    "cipher": info.cipher,
+                    "note": info.note,
+                    "open": is_open,
+                    "remaining_seconds": int(remaining.total_seconds()),
+                }
+            )
+        )
         return
 
     print(f"created:  {info.created_at.astimezone().isoformat()}")

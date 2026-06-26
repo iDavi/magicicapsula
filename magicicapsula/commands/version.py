@@ -1,4 +1,5 @@
 import argparse
+
 from magicicapsula import __version__
 from magicicapsula.commands import _style
 

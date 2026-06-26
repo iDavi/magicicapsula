@@ -1,5 +1,5 @@
-from magicicapsula.core import draft
 from magicicapsula.commands._util import parse_unlock
+from magicicapsula.core import draft
 
 
 def register(sub):
@@ -14,7 +14,7 @@ def run(args):
     try:
         d = draft.init()
     except FileExistsError:
-        raise SystemExit("error: a capsule draft already exists here (.capsule/)")
+        raise SystemExit("error: a capsule draft already exists here (.capsule/)") from None
 
     if args.unlock:
         d.unlock_at = parse_unlock(args.unlock).isoformat()  # resolve +30d/+1y etc. now

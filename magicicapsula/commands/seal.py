@@ -2,9 +2,9 @@ import os
 import sys
 from datetime import datetime, timezone
 
-from magicicapsula.core import capsule, draft
 from magicicapsula.commands import _style
 from magicicapsula.commands._util import ask_password, parse_unlock
+from magicicapsula.core import capsule, draft
 
 
 def register(sub):
@@ -13,8 +13,9 @@ def register(sub):
     p.add_argument("-o", "--out", metavar="FILE", help="output capsule file, overrides the draft's")
     p.add_argument("-n", "--note", help="plaintext note, overrides the draft's")
     p.add_argument("-f", "--force", action="store_true", help="overwrite the output if it exists")
-    p.add_argument("-P", "--no-password", action="store_true",
-                   help="seal without a password (anyone can open it after the date)")
+    p.add_argument(
+        "-P", "--no-password", action="store_true", help="seal without a password (anyone can open it after the date)"
+    )
     p.set_defaults(func=run)
 
 

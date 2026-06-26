@@ -9,6 +9,11 @@ folded lines, escaped text, a stable uid, and a display VALARM.
 import hashlib
 from datetime import datetime, timedelta, timezone
 
+_FOLD_LIMIT = 75  # rfc 5545 3.1: max octets per line before folding
+# utf-8 continuation bytes match 0b10xxxxxx; used to back off mid-sequence
+_UTF8_CONT_MASK = 0xC0
+_UTF8_CONT_BITS = 0x80
+
 
 def _stamp(dt: datetime) -> str:
     return dt.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
@@ -17,11 +22,7 @@ def _stamp(dt: datetime) -> str:
 def _escape(text: str) -> str:
     # rfc 5545 3.3.11: escape backslash first, then ; , and newlines.
     return (
-        text.replace("\\", "\\\\")
-        .replace(";", "\\;")
-        .replace(",", "\\,")
-        .replace("\r\n", "\\n")
-        .replace("\n", "\\n")
+        text.replace("\\", "\\\\").replace(";", "\\;").replace(",", "\\,").replace("\r\n", "\\n").replace("\n", "\\n")
     )
 
 
@@ -30,17 +31,17 @@ def _fold(line: str) -> str:
     # begins with a single space. fold on octets, backing off so a utf-8
     # multibyte sequence is never split across the boundary.
     raw = line.encode("utf-8")
-    if len(raw) <= 75:
+    if len(raw) <= _FOLD_LIMIT:
         return line
     chunks = []
-    limit = 75  # the first line gets a full 75; folded lines lose one to the leading space
+    limit = _FOLD_LIMIT  # the first line gets a full 75; folded lines lose one to the leading space
     while len(raw) > limit:
         cut = limit
-        while cut > 0 and (raw[cut] & 0xC0) == 0x80:
+        while cut > 0 and (raw[cut] & _UTF8_CONT_MASK) == _UTF8_CONT_BITS:
             cut -= 1
         chunks.append(raw[:cut])
         raw = raw[cut:]
-        limit = 74
+        limit = _FOLD_LIMIT - 1
     chunks.append(raw)
     return "\r\n ".join(c.decode("utf-8") for c in chunks)
 
@@ -48,7 +49,7 @@ def _fold(line: str) -> str:
 def _uid(name: str, unlock_at: datetime) -> str:
     # stable across re-runs for the same capsule, so re-importing updates
     # the event instead of creating a duplicate.
-    digest = hashlib.sha1(f"{name}|{_stamp(unlock_at)}".encode("utf-8")).hexdigest()
+    digest = hashlib.sha1(f"{name}|{_stamp(unlock_at)}".encode()).hexdigest()
     return f"{digest[:16]}@magicicapsula"
 
 

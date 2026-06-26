@@ -1,9 +1,9 @@
 import os
 from datetime import datetime, timezone
 
-from magicicapsula.core import capsule, ics
 from magicicapsula.commands import _style
 from magicicapsula.commands._util import fmt_remaining, read_capsule
+from magicicapsula.core import capsule, ics
 
 
 def register(sub):
@@ -14,7 +14,11 @@ def register(sub):
     p.add_argument("file", help="capsule file")
     p.add_argument("-o", "--out", metavar="FILE", help="output .ics path (default: <capsule>.ics)")
     p.add_argument(
-        "-b", "--before", type=int, default=0, metavar="DAYS",
+        "-b",
+        "--before",
+        type=int,
+        default=0,
+        metavar="DAYS",
         help="remind this many days before the unlock date (default: on the day)",
     )
     p.add_argument("-f", "--force", action="store_true", help="overwrite the output if it exists")

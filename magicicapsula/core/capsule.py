@@ -43,9 +43,9 @@ from . import crypto
 from .errors import CapsuleLocked, InvalidCapsule, WrongPasswordOrCorrupt
 
 MAGIC = b"MCAP"
-VERSION = 2             # the container version seal() writes (v2: aes-256-gcm + aad)
-MIN_READ_VERSION = 1    # oldest version this build can still read
-_HEADER_START = 9       # magic(4) + version(1) + header length(4)
+VERSION = 2  # the container version seal() writes (v2: aes-256-gcm + aad)
+MIN_READ_VERSION = 1  # oldest version this build can still read
+_HEADER_START = 9  # magic(4) + version(1) + header length(4)
 
 
 @dataclass
@@ -79,10 +79,10 @@ def _pack(paths) -> bytes:
     buf = io.BytesIO()
     with tarfile.open(fileobj=buf, mode="w:gz") as tar:
         for path in paths:
-            path = os.path.normpath(path)
-            if not os.path.exists(path):
-                raise FileNotFoundError(path)
-            tar.add(path, arcname=os.path.basename(path))
+            norm = os.path.normpath(path)
+            if not os.path.exists(norm):
+                raise FileNotFoundError(norm)
+            tar.add(norm, arcname=os.path.basename(norm))
     return buf.getvalue()
 
 
