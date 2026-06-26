@@ -20,14 +20,18 @@ def run(args):
     remaining = info.remaining(now)
 
     if args.json:
-        print(json.dumps({
-            "created_at": info.created_at.astimezone().isoformat(),
-            "unlock_at": info.unlock_at.astimezone().isoformat(),
-            "cipher": info.cipher,
-            "note": info.note,
-            "open": is_open,
-            "remaining_seconds": int(remaining.total_seconds()),
-        }))
+        print(
+            json.dumps(
+                {
+                    "created_at": info.created_at.astimezone().isoformat(),
+                    "unlock_at": info.unlock_at.astimezone().isoformat(),
+                    "cipher": info.cipher,
+                    "note": info.note,
+                    "open": is_open,
+                    "remaining_seconds": int(remaining.total_seconds()),
+                }
+            )
+        )
         return
 
     print(f"created:  {info.created_at.astimezone().isoformat()}")
