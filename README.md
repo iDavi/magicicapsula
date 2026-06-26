@@ -90,7 +90,9 @@ magicicapsula seal [-u DATE] [-o FILE] [-n NOTE] [-f] [-P]
 show a capsule's dates and status. no password needed.
 
 ```
-magicicapsula info <file>
+magicicapsula info <file> [--json]
+
+  --json  print capsule metadata as JSON
 ```
 
 ### open
