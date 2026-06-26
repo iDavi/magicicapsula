@@ -38,6 +38,7 @@ dev = ["ruff>=0.15"]
 
 [project.scripts]
 magicicapsula = "magicicapsula.cli:main"
+mcap = "magicicapsula.cli:main"
 
 [tool.setuptools.dynamic]
 version = { attr = "magicicapsula.__version__" }

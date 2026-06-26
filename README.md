@@ -12,6 +12,9 @@ pip install magicicapsula
 
 needs python 3.10+
 
+the `mcap` command is a shorthand alias for `magicicapsula`; the two are
+interchangeable (`mcap seal`, `mcap open capsule.mcap`, ...).
+
 ## how it works
 
 the workflow is staged, so you don't have to add everything at once:
