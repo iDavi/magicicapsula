@@ -150,3 +150,16 @@ magicicapsula config unset <key>      # remove from the config file
 absolute `YYYY-MM-DD` or `YYYY-MM-DDTHH:MM` (`2030-01-01`, `2030-01-01T08:00`),
 or relative from now: `+30d`, `+2w`, `+6m`, `+1y`.
 
+## development
+
+```
+pip install -e ".[dev]"   # installs ruff + pytest
+ruff check . && ruff format --check .
+pytest                    # runs the suite with a 90% coverage gate
+```
+
+tests are spec-driven: each core feature (`crypto`, `capsule`, `draft`,
+`ics`, `config`) is exercised through its public api, and the command layer
+is tested by asserting the printed output with the core mocked out. lint and
+tests both run in CI on every push and pull request.
+

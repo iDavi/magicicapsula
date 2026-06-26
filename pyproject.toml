@@ -34,7 +34,7 @@ Repository = "https://github.com/iDavi/magicicapsula"
 Issues = "https://github.com/iDavi/magicicapsula/issues"
 
 [project.optional-dependencies]
-dev = ["ruff>=0.15"]
+dev = ["ruff>=0.15", "pytest>=8", "pytest-cov>=5"]
 
 [project.scripts]
 magicicapsula = "magicicapsula.cli:main"
@@ -81,3 +81,26 @@ ignore = [
 [tool.ruff.lint.flake8-bugbear]
 # KdfParams is a frozen (immutable) dataclass, so it's safe as a default.
 extend-immutable-calls = ["magicicapsula.core.crypto.KdfParams"]
+
+[tool.ruff.lint.per-file-ignores]
+# tests lean on private helpers, asserts, mock lambdas, and inline literals;
+# the strict ruleset is aimed at the package, not the test scaffolding.
+"tests/**" = [
+    "S101",     # asserts are the point of a test
+    "SLF001",   # tests may touch private helpers
+    "PLR2004",  # magic numbers in assertions read fine
+    "PLW0108",  # mock lambdas don't need to be named functions
+    "SIM115",   # terse open().read() in an assert is fine
+    "C408",     # dict(...) factories are readable here
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=magicicapsula --cov-report=term-missing --cov-fail-under=90"
+
+[tool.coverage.run]
+branch = true
+omit = ["magicicapsula/__main__.py"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if __name__ == .__main__.:"]
