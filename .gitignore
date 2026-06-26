@@ -17,3 +17,8 @@ env/
 
 # os
 .DS_Store
+
+# test / coverage artifacts
+.coverage
+htmlcov/
+.pytest_cache/

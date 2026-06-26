@@ -1,0 +1,29 @@
+name: tests
+
+# runs the pytest suite (with its 90% coverage gate) on every push and PR,
+# across the python versions the package declares support for.
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  pytest:
+    name: pytest (py${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install package with test deps
+        run: python -m pip install --upgrade pip && pip install -e ".[dev]"
+
+      - name: run tests
+        run: pytest
