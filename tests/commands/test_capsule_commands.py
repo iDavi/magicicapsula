@@ -45,7 +45,7 @@ def test_seal_writes_blob_and_reports(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(seal_cmd, "ask_password", lambda confirm=False: "pw")
     monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"BLOB")
 
-    args = SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=False)
+    args = SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=False, rm=False)
     seal_cmd.run(args)
 
     out = capsys.readouterr().out
@@ -61,7 +61,7 @@ def test_seal_without_password_notes_it(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
     monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"B")
 
-    args = SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True)
+    args = SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True, rm=False)
     seal_cmd.run(args)
     assert "anyone can open it" in capsys.readouterr().out
 
@@ -74,7 +74,7 @@ def test_seal_applies_flag_overrides(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
     monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"B")
 
-    args = SimpleNamespace(unlock="2030-01-01", note="overridden", out="new.mcap", force=False, no_password=True)
+    args = SimpleNamespace(unlock="2030-01-01", note="overridden", out="new.mcap", force=False, no_password=True, rm=False)
     seal_cmd.run(args)
     # the flags overrode the draft and stuck
     assert d.note == "overridden" and d.out == "new.mcap"
@@ -88,7 +88,7 @@ def test_seal_errors_on_missing_staged_files(tmp_path, monkeypatch):
     monkeypatch.setattr(seal_cmd.draft, "missing", lambda d: ["/gone"])
     monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
     with pytest.raises(SystemExit, match="no longer exist"):
-        seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True))
+        seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True, rm=False))
 
 
 def test_seal_warns_when_unlock_in_the_past(tmp_path, monkeypatch, capsys):
@@ -98,7 +98,7 @@ def test_seal_warns_when_unlock_in_the_past(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(seal_cmd.draft, "missing", lambda d: [])
     monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2000, 1, 1, tzinfo=timezone.utc))
     monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"B")
-    seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True))
+    seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True, rm=False))
     assert "not in the future" in capsys.readouterr().err
 
 
@@ -107,7 +107,7 @@ def test_seal_errors_without_unlock_date(tmp_path, monkeypatch):
     monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
     monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
     with pytest.raises(SystemExit, match="no unlock date"):
-        seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True))
+        seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True, rm=False))
 
 
 def test_seal_errors_when_nothing_staged(tmp_path, monkeypatch):
@@ -115,7 +115,7 @@ def test_seal_errors_when_nothing_staged(tmp_path, monkeypatch):
     monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
     monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
     with pytest.raises(SystemExit, match="nothing staged"):
-        seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True))
+        seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True, rm=False))
 
 
 def test_seal_refuses_to_clobber_without_force(tmp_path, monkeypatch):
@@ -126,7 +126,102 @@ def test_seal_refuses_to_clobber_without_force(tmp_path, monkeypatch):
     monkeypatch.setattr(seal_cmd.draft, "missing", lambda d: [])
     monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
     with pytest.raises(SystemExit, match="already exists"):
-        seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True))
+        seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True, rm=False))
+
+
+# --- seal with --rm -----------------------------------------------------
+
+
+def test_seal_with_rm_deletes_staged_files(tmp_path, monkeypatch, capsys):
+    """--rm deletes staged files after sealing."""
+    f1 = tmp_path / "letter.txt"
+    f2 = tmp_path / "diary.txt"
+    f1.write_text("hello")
+    f2.write_text("world")
+
+    d = SimpleNamespace(
+        unlock_at="2030-01-01T00:00:00", note="", out="c.mcap",
+        staged=[str(f1), str(f2)], root=str(tmp_path),
+    )
+    monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
+    monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
+    monkeypatch.setattr(seal_cmd.draft, "missing", lambda d: [])
+    monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
+    monkeypatch.setattr(seal_cmd, "ask_password", lambda confirm=False: "pw")
+    monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"BLOB")
+
+    seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=False, rm=True))
+    assert not f1.exists()
+    assert not f2.exists()
+    assert "deleted 2 staged file(s)" in capsys.readouterr().out
+
+
+def test_seal_with_rm_skips_non_existent(tmp_path, monkeypatch, capsys):
+    """--rm silently skips files already gone (e.g. draft files inside .capsule/)."""
+    existing = tmp_path / "letter.txt"
+    existing.write_text("hello")
+    gone = str(tmp_path / "already_deleted.txt")
+
+    d = SimpleNamespace(
+        unlock_at="2030-01-01T00:00:00", note="", out="c.mcap",
+        staged=[str(existing), gone], root=str(tmp_path),
+    )
+    monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
+    monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
+    monkeypatch.setattr(seal_cmd.draft, "missing", lambda d: [])
+    monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
+    monkeypatch.setattr(seal_cmd, "ask_password", lambda confirm=False: "pw")
+    monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"BLOB")
+
+    seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=False, rm=True))
+    assert not existing.exists()
+    assert "deleted 1 staged file(s)" in capsys.readouterr().out
+
+
+def test_seal_with_rm_skips_output_file(tmp_path, monkeypatch, capsys):
+    """--rm does not delete the output capsule file if it happens to be staged."""
+    staged = tmp_path / "capsule.mcap"
+    staged.write_text("content")
+
+    d = SimpleNamespace(
+        unlock_at="2030-01-01T00:00:00", note="", out="capsule.mcap",
+        staged=[str(staged)], root=str(tmp_path),
+    )
+    monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
+    monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
+    monkeypatch.setattr(seal_cmd.draft, "missing", lambda d: [])
+    monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
+    monkeypatch.setattr(seal_cmd, "ask_password", lambda confirm=False: "pw")
+
+    # seal will overwrite it; after seal staged path == out path so it should warn
+    monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"NEW")
+
+    seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=True, no_password=False, rm=True))
+    assert staged.exists()  # capsule output survives
+    assert staged.read_bytes() == b"NEW"
+    err = capsys.readouterr().err
+    assert "warning:" in err
+    assert "is the capsule output file" in err
+
+
+def test_seal_without_rm_does_not_delete(tmp_path, monkeypatch, capsys):
+    """Without --rm, staged files remain on disk."""
+    f = tmp_path / "letter.txt"
+    f.write_text("hello")
+
+    d = SimpleNamespace(
+        unlock_at="2030-01-01T00:00:00", note="", out="c.mcap",
+        staged=[str(f)], root=str(tmp_path),
+    )
+    monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
+    monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
+    monkeypatch.setattr(seal_cmd.draft, "missing", lambda d: [])
+    monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
+    monkeypatch.setattr(seal_cmd, "ask_password", lambda confirm=False: "pw")
+    monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"BLOB")
+
+    seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=False, rm=False))
+    assert f.exists()
 
 
 # --- open ---------------------------------------------------------------

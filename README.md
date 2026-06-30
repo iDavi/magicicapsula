@@ -80,13 +80,14 @@ seal everything staged into a capsule file. flags override the draft's
 settings and stick.
 
 ```
-magicicapsula seal [-u DATE] [-o FILE] [-n NOTE] [-f] [-P]
+magicicapsula seal [-u DATE] [-o FILE] [-n NOTE] [-f] [-P] [--rm]
 
   -u, --unlock DATE  unlock date, overrides the draft's
   -o, --out FILE     output capsule file, overrides the draft's
   -n, --note NOTE    plaintext note, overrides the draft's
   -f, --force        overwrite the output if it exists
   -P, --no-password  seal without a password (anyone can open it after the date)
+  --rm               delete staged files after sealing
 ```
 
 ### info

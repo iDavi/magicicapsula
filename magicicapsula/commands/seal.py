@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 from datetime import datetime, timezone
 
@@ -16,6 +17,7 @@ def register(sub):
     p.add_argument(
         "-P", "--no-password", action="store_true", help="seal without a password (anyone can open it after the date)"
     )
+    p.add_argument("--rm", action="store_true", help="delete staged files after sealing")
     p.set_defaults(func=run)
 
 
@@ -58,3 +60,25 @@ def run(args):
     print(f"unlocks: {unlock_at.astimezone().isoformat()}")
     if pw is None:
         print(_style.dim("no password set, so anyone can open it after that date"))
+
+    if args.rm:
+        deleted = 0
+        failed = []
+        for path in d.staged:
+            if path == os.path.normpath(out):
+                failed.append((path, "is the capsule output file"))
+                continue
+            if not os.path.exists(path):
+                continue
+            try:
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+                else:
+                    os.remove(path)
+                deleted += 1
+            except OSError as exc:
+                failed.append((path, str(exc)))
+        if deleted:
+            print(_style.red(f"deleted {deleted} staged file(s)"))
+        for path, reason in failed:
+            print(_style.red(f"warning: could not delete {path}: {reason}"), file=sys.stderr)
