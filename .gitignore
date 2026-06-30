@@ -11,6 +11,9 @@ dist/
 venv/
 env/
 
+# editor
+.vscode/
+
 # capsule artifacts
 *.mcap
 .capsule/

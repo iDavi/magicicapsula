@@ -74,7 +74,9 @@ def test_seal_applies_flag_overrides(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
     monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"B")
 
-    args = SimpleNamespace(unlock="2030-01-01", note="overridden", out="new.mcap", force=False, no_password=True, rm=False)
+    args = SimpleNamespace(
+        unlock="2030-01-01", note="overridden", out="new.mcap", force=False, no_password=True, rm=False
+    )
     seal_cmd.run(args)
     # the flags overrode the draft and stuck
     assert d.note == "overridden" and d.out == "new.mcap"
@@ -140,8 +142,11 @@ def test_seal_with_rm_deletes_staged_files(tmp_path, monkeypatch, capsys):
     f2.write_text("world")
 
     d = SimpleNamespace(
-        unlock_at="2030-01-01T00:00:00", note="", out="c.mcap",
-        staged=[str(f1), str(f2)], root=str(tmp_path),
+        unlock_at="2030-01-01T00:00:00",
+        note="",
+        out="c.mcap",
+        staged=[str(f1), str(f2)],
+        root=str(tmp_path),
     )
     monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
     monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
@@ -163,8 +168,11 @@ def test_seal_with_rm_skips_non_existent(tmp_path, monkeypatch, capsys):
     gone = str(tmp_path / "already_deleted.txt")
 
     d = SimpleNamespace(
-        unlock_at="2030-01-01T00:00:00", note="", out="c.mcap",
-        staged=[str(existing), gone], root=str(tmp_path),
+        unlock_at="2030-01-01T00:00:00",
+        note="",
+        out="c.mcap",
+        staged=[str(existing), gone],
+        root=str(tmp_path),
     )
     monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
     monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
@@ -184,8 +192,11 @@ def test_seal_with_rm_skips_output_file(tmp_path, monkeypatch, capsys):
     staged.write_text("content")
 
     d = SimpleNamespace(
-        unlock_at="2030-01-01T00:00:00", note="", out="capsule.mcap",
-        staged=[str(staged)], root=str(tmp_path),
+        unlock_at="2030-01-01T00:00:00",
+        note="",
+        out="capsule.mcap",
+        staged=[str(staged)],
+        root=str(tmp_path),
     )
     monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
     monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
@@ -210,8 +221,11 @@ def test_seal_without_rm_does_not_delete(tmp_path, monkeypatch, capsys):
     f.write_text("hello")
 
     d = SimpleNamespace(
-        unlock_at="2030-01-01T00:00:00", note="", out="c.mcap",
-        staged=[str(f)], root=str(tmp_path),
+        unlock_at="2030-01-01T00:00:00",
+        note="",
+        out="c.mcap",
+        staged=[str(f)],
+        root=str(tmp_path),
     )
     monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
     monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
