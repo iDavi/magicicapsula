@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 from datetime import datetime, timezone
 
@@ -16,6 +17,7 @@ def register(sub):
     p.add_argument(
         "-P", "--no-password", action="store_true", help="seal without a password (anyone can open it after the date)"
     )
+    p.add_argument("--rm", action="store_true", help="delete staged files after sealing")
     p.set_defaults(func=run)
 
 
@@ -53,8 +55,48 @@ def run(args):
     with open(out, "wb") as fh:
         fh.write(blob)
 
+    if os.path.getsize(out) != len(blob):
+        raise SystemExit(f"error: capsule file {out} was corrupted during write")
+
     print(_style.logo())
     print(_style.green(f"sealed {len(d.staged)} item(s) into {out}"))
     print(f"unlocks: {unlock_at.astimezone().isoformat()}")
     if pw is None:
         print(_style.dim("no password set, so anyone can open it after that date"))
+
+    if args.rm:
+        deleted = 0
+        failed = []
+        out_real = os.path.realpath(out)
+        for path in d.staged:
+            if not os.path.exists(path):
+                continue
+            try:
+                path_real = os.path.realpath(path)
+
+                # never delete the capsule output itself
+                if os.path.samefile(path, out):
+                    failed.append((path, "is the capsule output file"))
+                    continue
+
+                # and never delete a directory that would remove the output
+                if os.path.isdir(path):
+                    try:
+                        if os.path.commonpath([path_real, out_real]) == path_real:
+                            failed.append((path, "contains the capsule output file"))
+                            continue
+                    except ValueError:
+                        # different drives / invalid paths; ignore ancestry check
+                        pass
+
+                if os.path.isdir(path):
+                    shutil.rmtree(path)
+                else:
+                    os.remove(path)
+                deleted += 1
+            except OSError as exc:
+                failed.append((path, str(exc)))
+        if deleted:
+            print(_style.red(f"deleted {deleted} staged file(s)"))
+        for path, reason in failed:
+            print(_style.red(f"warning: could not delete {path}: {reason}"), file=sys.stderr)
