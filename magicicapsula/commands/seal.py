@@ -55,6 +55,9 @@ def run(args):
     with open(out, "wb") as fh:
         fh.write(blob)
 
+    if os.path.getsize(out) != len(blob):
+        raise SystemExit(f"error: capsule file {out} was corrupted during write")
+
     print(_style.logo())
     print(_style.green(f"sealed {len(d.staged)} item(s) into {out}"))
     print(f"unlocks: {unlock_at.astimezone().isoformat()}")

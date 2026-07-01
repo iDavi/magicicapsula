@@ -6,6 +6,7 @@ that's exactly the contract under test here.
 """
 
 import json
+import os
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
@@ -131,6 +132,27 @@ def test_seal_refuses_to_clobber_without_force(tmp_path, monkeypatch):
         seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True, rm=False))
 
 
+def test_seal_verifies_written_size(tmp_path, monkeypatch):
+    """A size mismatch after write raises an error."""
+    d = SimpleNamespace(unlock_at="2030-01-01T00:00:00", note="", out="c.mcap", staged=["/a"], root=str(tmp_path))
+    monkeypatch.setattr(seal_cmd.draft, "load", lambda: d)
+    monkeypatch.setattr(seal_cmd.draft, "save", lambda d: None)
+    monkeypatch.setattr(seal_cmd.draft, "missing", lambda d: [])
+    monkeypatch.setattr(seal_cmd, "parse_unlock", lambda s: datetime(2030, 1, 1, tzinfo=timezone.utc))
+    monkeypatch.setattr(seal_cmd, "ask_password", lambda confirm=False: "pw")
+    monkeypatch.setattr(seal_cmd.capsule, "seal", lambda *a, **k: b"BLOB")
+    # Simulate a write corruption by lying about the file size
+    original_getsize = os.path.getsize
+
+    def fake_getsize(path):
+        return original_getsize(path) + 99
+
+    monkeypatch.setattr(os.path, "getsize", fake_getsize)
+
+    with pytest.raises(SystemExit, match="corrupted during write"):
+        seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=True, rm=False))
+
+
 # --- seal with --rm -----------------------------------------------------
 
 
@@ -184,7 +206,6 @@ def test_seal_with_rm_skips_non_existent(tmp_path, monkeypatch, capsys):
     seal_cmd.run(SimpleNamespace(unlock=None, note=None, out=None, force=False, no_password=False, rm=True))
     assert not existing.exists()
     assert "deleted 1 staged file(s)" in capsys.readouterr().out
-
 
 def test_seal_with_rm_skips_output_file(tmp_path, monkeypatch, capsys):
     """--rm does not delete the output capsule file if it happens to be staged."""
