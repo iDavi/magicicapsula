@@ -67,13 +67,28 @@ def run(args):
     if args.rm:
         deleted = 0
         failed = []
+        out_real = os.path.realpath(out)
         for path in d.staged:
-            if path == os.path.normpath(out):
-                failed.append((path, "is the capsule output file"))
-                continue
             if not os.path.exists(path):
                 continue
             try:
+                path_real = os.path.realpath(path)
+
+                # never delete the capsule output itself
+                if os.path.samefile(path, out):
+                    failed.append((path, "is the capsule output file"))
+                    continue
+
+                # and never delete a directory that would remove the output
+                if os.path.isdir(path):
+                    try:
+                        if os.path.commonpath([path_real, out_real]) == path_real:
+                            failed.append((path, "contains the capsule output file"))
+                            continue
+                    except ValueError:
+                        # different drives / invalid paths; ignore ancestry check
+                        pass
+
                 if os.path.isdir(path):
                     shutil.rmtree(path)
                 else:
