@@ -207,6 +207,7 @@ def test_seal_with_rm_skips_non_existent(tmp_path, monkeypatch, capsys):
     assert not existing.exists()
     assert "deleted 1 staged file(s)" in capsys.readouterr().out
 
+
 def test_seal_with_rm_skips_output_file(tmp_path, monkeypatch, capsys):
     """--rm does not delete the output capsule file if it happens to be staged."""
     staged = tmp_path / "capsule.mcap"
